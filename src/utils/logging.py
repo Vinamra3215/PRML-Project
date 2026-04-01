@@ -1,7 +1,3 @@
-"""
-Logging, experiment tracking, and W&B integration.
-Provides unified interface for local CSV logging + optional W&B cloud tracking.
-"""
 import logging
 import os
 import json
@@ -10,7 +6,6 @@ from datetime import datetime
 
 
 def get_logger(name, level=logging.INFO):
-    """Get a configured logger."""
     logger = logging.getLogger(name)
     if not logger.handlers:
         handler = logging.StreamHandler()
@@ -21,24 +16,11 @@ def get_logger(name, level=logging.INFO):
     return logger
 
 
-# ── W&B Integration ──────────────────────────────────────────────────
 
 _wandb_enabled = False
 
 
 def init_wandb(project="prml-food-classification", config=None, run_name=None, tags=None):
-    """
-    Initialize W&B run. Gracefully skips if wandb not installed.
-
-    Args:
-        project: W&B project name
-        config: Dict of hyperparameters to log
-        run_name: Human-readable run name (e.g. "svm_rbf_cnn_none")
-        tags: List of tags (e.g. ["cnn", "svm", "no-pca"])
-
-    Returns:
-        True if W&B initialized, False otherwise
-    """
     global _wandb_enabled
     try:
         import wandb
@@ -62,7 +44,6 @@ def init_wandb(project="prml-food-classification", config=None, run_name=None, t
 
 
 def log_wandb(metrics_dict):
-    """Log metrics to W&B if enabled."""
     global _wandb_enabled
     if not _wandb_enabled:
         return
@@ -74,7 +55,6 @@ def log_wandb(metrics_dict):
 
 
 def finish_wandb():
-    """Finish current W&B run."""
     global _wandb_enabled
     if not _wandb_enabled:
         return
@@ -86,23 +66,16 @@ def finish_wandb():
 
 
 def is_wandb_enabled():
-    """Check if W&B is currently active."""
     return _wandb_enabled
 
 
-# ── Local Experiment Log ─────────────────────────────────────────────
 
 def log_experiment_csv(results_dir, run_data):
-    """
-    Append experiment to local experiment_log.csv with full tracking info.
-    This is the detailed log (more fields than master.csv).
-    """
     import pandas as pd
 
     log_path = os.path.join(results_dir, "experiment_log.csv")
     os.makedirs(results_dir, exist_ok=True)
 
-    # Add metadata
     run_data["timestamp"] = datetime.now().isoformat()
     run_data["params_json"] = json.dumps(run_data.get("params", {}))
 
@@ -115,10 +88,8 @@ def log_experiment_csv(results_dir, run_data):
     df.to_csv(log_path, index=False)
 
 
-# ── Timing Wrapper ───────────────────────────────────────────────────
 
 class Timer:
-    """Context manager for timing code blocks."""
 
     def __init__(self, label=""):
         self.label = label
