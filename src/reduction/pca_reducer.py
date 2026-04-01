@@ -1,15 +1,10 @@
-"""
-PCA dimensionality reduction wrapper.
-Covers: Course Topics #12, #13.
-"""
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
 
 class PCAReducer:
-    """Wrapped sklearn PCA with variance analysis plots."""
-
+   
     def __init__(self, n_components=100, whiten=True):
         self.pca = PCA(n_components=n_components, whiten=whiten)
         self.is_fitted = False
@@ -27,7 +22,6 @@ class PCAReducer:
         return self.transform(X)
 
     def plot_explained_variance(self, save_path=None):
-        """Plot cumulative explained variance (scree plot)."""
         if not self.is_fitted:
             raise RuntimeError("PCA not fitted yet.")
         cumvar = np.cumsum(self.pca.explained_variance_ratio_)
@@ -44,7 +38,6 @@ class PCAReducer:
         plt.close()
 
     def plot_2d(self, X, y, class_names=None, save_path=None):
-        """2D PCA projection scatter plot."""
         pca_2d = PCA(n_components=2)
         X_2d = pca_2d.fit_transform(X)
         plt.figure(figsize=(10, 8))
