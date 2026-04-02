@@ -8,7 +8,7 @@ def get_cache_path(cache_dir: str, feature_type: str, split: str) -> str:
     return os.path.join(cache_dir, feature_type, f"{split}.h5")
 
 def cache_exists(cache_dir: str, feature_type: str, split: str) -> bool:
-    """Check if a cached feature matrix exists."""
+    
     return os.path.exists(get_cache_path(cache_dir, feature_type, split))
 
 
@@ -37,12 +37,7 @@ def save_features(
 def load_features(
     cache_dir: str, feature_type: str, split: str
 ) -> tuple:
-    """
-    Load cached feature matrix and labels from HDF5.
 
-    Returns:
-        (X, y) tuple of numpy arrays
-    """
     path = get_cache_path(cache_dir, feature_type, split)
     if not os.path.exists(path):
         raise FileNotFoundError(
