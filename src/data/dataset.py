@@ -76,3 +76,13 @@ class Food101Dataset:
         print(f"  Train: {len(X_train)}, Val: {len(X_val)}, Test: {len(X_test)}")
 
         return (X_train.tolist(), y_train), (X_val.tolist(), y_val), (X_test.tolist(), y_test)
+
+    def __len__(self):
+        return len(self.train_paths) + len(self.test_paths)
+
+    def __repr__(self):
+        return (
+            f"Food101Dataset(n_classes={self.n_classes}, "
+            f"train={len(self.train_paths)}, test={len(self.test_paths)}, "
+            f"classes={self.class_names[:5]}...)"
+        )
