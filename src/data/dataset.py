@@ -55,3 +55,24 @@ class Food101Dataset:
                     labels.append(label)
 
         return paths, np.array(labels)
+
+    def get_splits(self):
+        from sklearn.model_selection import train_test_split
+
+        paths = np.array(self.train_paths)
+        labels = self.train_labels
+
+        X_train, X_val, y_train, y_val = train_test_split(
+            paths, labels,
+            test_size=self.val_split,
+            random_state=self.seed,
+            stratify=labels,
+        )
+
+        X_test = np.array(self.test_paths)
+        y_test = self.test_labels
+
+        print(f"Dataset loaded: {len(self.class_names)} classes")
+        print(f"  Train: {len(X_train)}, Val: {len(X_val)}, Test: {len(X_test)}")
+
+        return (X_train.tolist(), y_train), (X_val.tolist(), y_val), (X_test.tolist(), y_test)
