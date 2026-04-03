@@ -25,4 +25,7 @@ class ColorHistogramExtractor(FeatureExtractor):
             histograms.extend([hist_h.flatten(), hist_s.flatten(), hist_v.flatten()])
 
         feature = np.concatenate(histograms)
+        norm = feature.sum()
+        if norm > 0:
+            feature = feature / norm
         return feature.astype(np.float32)
