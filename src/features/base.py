@@ -50,3 +50,9 @@ class FeatureExtractor(ABC):
         X = np.array(features, dtype=np.float32)
         y = np.array(valid_labels)
         return X, y
+
+    def _safe_extract(self, path: str, size: int) -> np.ndarray:
+        try:
+            return self.extract_from_path(path, size)
+        except Exception:
+            return None
