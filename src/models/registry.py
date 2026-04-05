@@ -29,3 +29,11 @@ REDUCER_REGISTRY = {
     "lda": LinearDiscriminantAnalysis,
     "none": None,
 }
+
+PARAM_GRIDS = {
+    "knn": {
+        "clf__n_neighbors": [3, 7, 11, 21],
+        "clf__weights": ["uniform", "distance"],
+        "clf__metric": ["euclidean", "manhattan"],
+    },
+}
