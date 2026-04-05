@@ -41,4 +41,12 @@ PARAM_GRIDS = {
         "clf__solver": ["lbfgs"],
         "clf__max_iter": [2000],
     },
+    "naive_bayes": {
+        "clf__var_smoothing": [1e-9, 1e-8, 1e-7, 1e-6],
+    },
+    "decision_tree": {
+        "clf__max_depth": [5, 10, 20, None],
+        "clf__min_samples_split": [2, 10],
+        "clf__min_samples_leaf": [1, 5],
+    },
 }
