@@ -21,3 +21,12 @@ class CNNEmbeddingExtractor(FeatureExtractor):
             transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225]),
         ])
+
+    def extract(self, image: np.ndarray) -> np.ndarray:
+        pil_image = Image.fromarray(image)
+        tensor = self.transform(pil_image).unsqueeze(0).to(self.device)
+
+        with torch.no_grad():
+            embedding = self.model(tensor).squeeze().cpu().numpy()
+
+        return embedding.astype(np.float32)
