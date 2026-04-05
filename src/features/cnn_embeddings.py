@@ -30,3 +30,41 @@ class CNNEmbeddingExtractor(FeatureExtractor):
             embedding = self.model(tensor).squeeze().cpu().numpy()
 
         return embedding.astype(np.float32)
+
+    def extract_dataset(self, image_paths, labels, size=224, n_jobs=1, batch_size=32):
+        from torch.utils.data import DataLoader, Dataset
+
+        transform = self.transform
+
+        class PathDataset(Dataset):
+            def __init__(self, paths, lbls, tfm):
+                self.paths = paths
+                self.labels = lbls
+                self.tfm = tfm
+
+            def __len__(self):
+                return len(self.paths)
+
+            def __getitem__(self, idx):
+                img = Image.open(self.paths[idx]).convert("RGB")
+                return self.tfm(img), self.labels[idx]
+
+        dataset = PathDataset(image_paths, labels, transform)
+        loader = DataLoader(
+            dataset, batch_size=batch_size, num_workers=0, pin_memory=False
+        )
+
+        all_features = []
+        all_labels = []
+        self.model.eval()
+
+        for batch_imgs, batch_labels in loader:
+            batch_imgs = batch_imgs.to(self.device)
+            with torch.no_grad():
+                feats = self.model(batch_imgs).cpu().numpy()
+            all_features.append(feats)
+            all_labels.append(batch_labels.numpy())
+
+        X = np.vstack(all_features).astype(np.float32)
+        y = np.concatenate(all_labels)
+        return X, y
