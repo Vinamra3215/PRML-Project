@@ -23,3 +23,9 @@ MODEL_REGISTRY = {
     "gradient_boosting": GradientBoostingClassifier,
     "kde":               KDEClassifier,
 }
+
+REDUCER_REGISTRY = {
+    "pca": PCA,
+    "lda": LinearDiscriminantAnalysis,
+    "none": None,
+}
