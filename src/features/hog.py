@@ -10,3 +10,23 @@ class HOGExtractor(FeatureExtractor):
         self.orientations = orientations
         self.pixels_per_cell = tuple(pixels_per_cell)
         self.cells_per_block = tuple(cells_per_block)
+
+    def extract(self, image: np.ndarray) -> np.ndarray:
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        features = skimage_hog(
+            gray, orientations=self.orientations,
+            pixels_per_cell=self.pixels_per_cell,
+            cells_per_block=self.cells_per_block,
+            visualize=False, feature_vector=True,
+        )
+        return features.astype(np.float32)
+
+    def extract_with_visualization(self, image):
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        features, hog_image = skimage_hog(
+            gray, orientations=self.orientations,
+            pixels_per_cell=self.pixels_per_cell,
+            cells_per_block=self.cells_per_block,
+            visualize=True, feature_vector=True,
+        )
+        return features.astype(np.float32), hog_image
