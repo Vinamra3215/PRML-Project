@@ -12,3 +12,15 @@ class GLCMExtractor(FeatureExtractor):
         self.properties = properties or [
             "contrast", "dissimilarity", "homogeneity", "energy", "correlation"
         ]
+
+    def extract(self, image: np.ndarray) -> np.ndarray:
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        gray = (gray // 4).astype(np.uint8)
+        glcm = graycomatrix(
+            gray, distances=self.distances, angles=self.angles,
+            levels=64, symmetric=True, normed=True,
+        )
+        features = []
+        for prop in self.properties:
+            features.append(graycoprops(glcm, prop).flatten())
+        return np.concatenate(features).astype(np.float32)
