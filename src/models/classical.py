@@ -46,3 +46,23 @@ class KDEClassifier(BaseEstimator, ClassifierMixin):
             log_prior = np.log(self.priors_[cls])
             log_probs[:, i] = log_likelihood + log_prior
         return log_probs
+
+
+def get_all_classical_models():
+    return {
+        "Naive Bayes": GaussianNB(),
+        "kNN (k=5, euclidean)": KNeighborsClassifier(n_neighbors=5, metric="euclidean"),
+        "kNN (k=5, manhattan)": KNeighborsClassifier(n_neighbors=5, metric="manhattan"),
+        "Weighted kNN (k=7)": KNeighborsClassifier(n_neighbors=7, weights="distance"),
+        "SGD Classifier": SGDClassifier(loss="hinge", max_iter=1000, random_state=42),
+        "Logistic Regression": LogisticRegression(
+            multi_class="multinomial", solver="lbfgs", max_iter=2000, random_state=42
+        ),
+        "Perceptron": Perceptron(max_iter=1000, random_state=42),
+        "Decision Tree": DecisionTreeClassifier(max_depth=20, random_state=42),
+        "Gradient Boosting": GradientBoostingClassifier(
+            n_estimators=100, max_depth=5, learning_rate=0.1, random_state=42
+        ),
+        "KDE (Gaussian)": KDEClassifier(bandwidth=1.0, kernel="gaussian"),
+        "KDE (Tophat / Parzen)": KDEClassifier(bandwidth=1.0, kernel="tophat"),
+    }
