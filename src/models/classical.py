@@ -27,3 +27,22 @@ class KDEClassifier(BaseEstimator, ClassifierMixin):
             self.models_[cls] = kde
 
         return self
+
+    def predict(self, X):
+        log_probs = self._compute_log_probs(X)
+        return self.classes_[np.argmax(log_probs, axis=1)]
+
+    def predict_proba(self, X):
+        log_probs = self._compute_log_probs(X)
+        log_probs -= log_probs.max(axis=1, keepdims=True)
+        probs = np.exp(log_probs)
+        probs /= probs.sum(axis=1, keepdims=True)
+        return probs
+
+    def _compute_log_probs(self, X):
+        log_probs = np.zeros((len(X), len(self.classes_)))
+        for i, cls in enumerate(self.classes_):
+            log_likelihood = self.models_[cls].score_samples(X)
+            log_prior = np.log(self.priors_[cls])
+            log_probs[:, i] = log_likelihood + log_prior
+        return log_probs
