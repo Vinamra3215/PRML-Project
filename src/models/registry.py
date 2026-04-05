@@ -36,4 +36,9 @@ PARAM_GRIDS = {
         "clf__weights": ["uniform", "distance"],
         "clf__metric": ["euclidean", "manhattan"],
     },
+    "logistic": {
+        "clf__C": [0.01, 0.1, 1.0, 10.0],
+        "clf__solver": ["lbfgs"],
+        "clf__max_iter": [2000],
+    },
 }
