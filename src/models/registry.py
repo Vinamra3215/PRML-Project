@@ -74,3 +74,16 @@ PARAM_GRIDS = {
         "clf__kernel": ["gaussian", "tophat"],
     },
 }
+
+def build_pipeline(model_name, model_params=None, reducer_name="none", reducer_params=None):
+
+    model_params = model_params or {}
+    reducer_params = reducer_params or {}
+
+    steps = [("scaler", StandardScaler())]
+
+    model_cls = MODEL_REGISTRY[model_name]
+    model = model_cls(**model_params)
+    steps.append(("clf", model))
+
+    return Pipeline(steps)
