@@ -82,6 +82,11 @@ def build_pipeline(model_name, model_params=None, reducer_name="none", reducer_p
 
     steps = [("scaler", StandardScaler())]
 
+    if reducer_name != "none" and reducer_name in REDUCER_REGISTRY:
+        reducer_cls = REDUCER_REGISTRY[reducer_name]
+        if reducer_cls is not None:
+            steps.append(("reducer", reducer_cls(**reducer_params)))
+
     model_cls = MODEL_REGISTRY[model_name]
     model = model_cls(**model_params)
     steps.append(("clf", model))
