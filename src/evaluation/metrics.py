@@ -5,7 +5,6 @@ from sklearn.metrics import (
 )
 
 def evaluate(pipeline, X_test, y_test):
-    """Compute all evaluation metrics."""
     y_pred = pipeline.predict(X_test)
     y_prob = None
     if hasattr(pipeline, "predict_proba"):
@@ -31,10 +30,8 @@ def evaluate(pipeline, X_test, y_test):
     return results, y_pred, y_prob
 
 def get_confusion_matrix(y_true, y_pred):
-    """Compute confusion matrix."""
     return confusion_matrix(y_true, y_pred)
 
 
 def get_classification_report(y_true, y_pred, class_names=None):
-    """Get detailed classification report."""
     return classification_report(y_true, y_pred, target_names=class_names)
