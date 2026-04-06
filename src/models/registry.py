@@ -92,3 +92,6 @@ def build_pipeline(model_name, model_params=None, reducer_name="none", reducer_p
     steps.append(("clf", model))
 
     return Pipeline(steps)
+
+def get_param_grid(model_name):
+    return PARAM_GRIDS.get(model_name, {})
