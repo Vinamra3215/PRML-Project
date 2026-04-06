@@ -15,7 +15,6 @@ def stratified_cv(pipeline, X, y, k=5, scoring=None):
     return results
 
 def print_cv_results(results, model_name="Model"):
-    """Print cross-validation results summary."""
     print(f"\n{'='*50}")
     print(f"{model_name}")
     print(f"{'='*50}")
@@ -26,7 +25,6 @@ def print_cv_results(results, model_name="Model"):
 
 
 def plot_learning_curve(pipeline, X, y, title="Learning Curve", save_path=None):
-    """Plot learning curve to analyze overfitting."""
     train_sizes, train_scores, val_scores = learning_curve(
         pipeline, X, y,
         train_sizes=np.linspace(0.1, 1.0, 10),
