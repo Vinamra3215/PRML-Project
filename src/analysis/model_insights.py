@@ -15,7 +15,7 @@ def analyze_confusion_matrix(y_true, y_pred, class_names):
         correct = cm[i, i]
         per_class_acc[class_names[i]] = round(correct / total, 4) if total > 0 else 0
 
-    # Most confused pairs (off-diagonal)
+    # Most confused pairs
     confused_pairs = []
     for i in range(n_classes):
         for j in range(n_classes):
@@ -30,7 +30,7 @@ def analyze_confusion_matrix(y_true, y_pred, class_names):
 
     confused_pairs.sort(key=lambda x: x["count"], reverse=True)
 
-    # Sort classes by accuracy
+    
     sorted_classes = sorted(per_class_acc.items(), key=lambda x: x[1])
     hardest = sorted_classes[:5]
     easiest = sorted_classes[-5:]
@@ -51,15 +51,15 @@ def generate_auto_summary(results_df, feature_type="cnn"):
     if df.empty:
         return "No valid results."
 
-    # Overall best
+   
     best_idx = df["test_accuracy"].idxmax()
     best = df.loc[best_idx]
 
-    # Best per feature
+    
     cnn_df = df[df["feature"] == "cnn"]
     hc_df = df[df["feature"] != "cnn"]
 
-    # Fastest
+    
     fastest_idx = df["time_seconds"].idxmin()
     fastest = df.loc[fastest_idx]
 
