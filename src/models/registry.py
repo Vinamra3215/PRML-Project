@@ -54,4 +54,14 @@ PARAM_GRIDS = {
         "clf__max_depth": [3, 5],
         "clf__learning_rate": [0.05, 0.1],
     },
+    "mlp_sklearn": {
+        "clf__hidden_layer_sizes": [(256, 128), (512, 256, 128)],
+        "clf__activation": ["relu"],
+        "clf__learning_rate_init": [0.001, 0.01],
+    },
+    "perceptron": {
+        "clf__penalty": [None, "l2"],
+        "clf__alpha": [0.0001, 0.001],
+        "clf__max_iter": [1000],
+    },
 }
