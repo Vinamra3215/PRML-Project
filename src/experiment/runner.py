@@ -31,6 +31,71 @@ def run_experiment(
     print(f"GridSearch: {'ON' if use_grid_search else 'OFF'}")
     print(f"{'=' * 60}")
 
+    X_train, y_train = load_features(cache_dir, feature_type, "train")
+    X_test, y_test = load_features(cache_dir, feature_type, "test")
+
+    best_params = {}
+
+    with Timer("Total experiment") as timer:
+        if use_grid_search:
+            
+            param_grid = get_param_grid(model_name)
+            if param_grid:
+                pipeline = build_pipeline(model_name, {}, reducer_name, reducer_params)
+                print(f"  GridSearchCV: {len(param_grid)} param groups, {cv_folds}-fold CV")
+
+                grid_search = GridSearchCV(
+                    pipeline,
+                    param_grid,
+                    cv=cv_folds,
+                    scoring="f1_macro",
+                    n_jobs=-1,
+                    verbose=0,
+                    refit=True,
+                )
+                grid_search.fit(X_train, y_train)
+
+                pipeline = grid_search.best_estimator_
+                best_params = grid_search.best_params_
+                cv_f1 = grid_search.best_score_
+
+                print(f"  Best params: {best_params}")
+                print(f"  Best CV F1:  {cv_f1:.4f}")
+
+                
+                from sklearn.model_selection import cross_val_score
+                cv_acc_scores = cross_val_score(
+                    pipeline, X_train, y_train,
+                    cv=cv_folds, scoring="accuracy", n_jobs=-1
+                )
+                cv_acc = cv_acc_scores.mean()
+            else:
+                
+                pipeline = build_pipeline(model_name, model_params, reducer_name, reducer_params)
+                cv_results = stratified_cv(pipeline, X_train, y_train, k=cv_folds)
+                print_cv_results(cv_results, model_name)
+                cv_acc = cv_results["test_accuracy"].mean()
+                cv_f1 = cv_results["test_f1_macro"].mean()
+                pipeline.fit(X_train, y_train)
+        else:
+            
+            pipeline = build_pipeline(model_name, model_params, reducer_name, reducer_params)
+            cv_results = stratified_cv(pipeline, X_train, y_train, k=cv_folds)
+            print_cv_results(cv_results, model_name)
+            cv_acc = cv_results["test_accuracy"].mean()
+            cv_f1 = cv_results["test_f1_macro"].mean()
+            pipeline.fit(X_train, y_train)
+
+        
+        test_metrics, y_pred, y_prob = evaluate(pipeline, X_test, y_test)
+
+    elapsed = timer.elapsed
+
     
+    print(f"\nTest Results:")
+    for k, v in test_metrics.items():
+        if v is not None:
+            print(f"  {k}: {v:.4f}")
+    print(f"  Time: {elapsed:.1f}s")
 
     return pipeline, test_metrics, y_pred, best_params
