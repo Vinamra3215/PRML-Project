@@ -12,3 +12,18 @@ def append_result(results_dir, run_data, csv_name="master.csv"):
         df = df_new
     df.to_csv(master_path, index=False)
     return df
+
+def load_master_results(results_dir, csv_name="master.csv"):
+    master_path = os.path.join(results_dir, csv_name)
+    if not os.path.exists(master_path):
+        return pd.DataFrame()
+    return pd.read_csv(master_path)
+
+
+def print_comparison_table(results_dir, csv_name="master.csv"):
+    df = load_master_results(results_dir, csv_name)
+    if df.empty:
+        print("No results found.")
+        return
+    df_sorted = df.sort_values("test_accuracy", ascending=False)
+    print(df_sorted.to_string(index=False))
