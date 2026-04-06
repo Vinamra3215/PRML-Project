@@ -49,4 +49,9 @@ PARAM_GRIDS = {
         "clf__min_samples_split": [2, 10],
         "clf__min_samples_leaf": [1, 5],
     },
+    "gradient_boosting": {
+        "clf__n_estimators": [50, 100],
+        "clf__max_depth": [3, 5],
+        "clf__learning_rate": [0.05, 0.1],
+    },
 }
