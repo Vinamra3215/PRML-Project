@@ -64,4 +64,13 @@ PARAM_GRIDS = {
         "clf__alpha": [0.0001, 0.001],
         "clf__max_iter": [1000],
     },
+    "sgd": {
+        "clf__loss": ["hinge", "modified_huber"],
+        "clf__alpha": [0.0001, 0.001, 0.01],
+        "clf__max_iter": [1000],
+    },
+    "kde": {
+        "clf__bandwidth": [0.5, 1.0, 2.0],
+        "clf__kernel": ["gaussian", "tophat"],
+    },
 }
