@@ -132,3 +132,58 @@ for bar, val in zip(bars, feat_df.values):
 plt.tight_layout()
 plt.savefig(os.path.join(PLOTS_DIR, "feature_comparison.png"))
 plt.close()
+
+
+print("[3/8] pca_explained_variance.png")
+# Use fused features (highest-dim handcrafted) for PCA analysis
+X_train, y_train = load_features("data/cache", "fused", "train")
+X_test, y_test = load_features("data/cache", "fused", "test")
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X_train)
+n_comp = min(300, X_scaled.shape[1])
+pca_full = PCA(n_components=n_comp)
+pca_full.fit(X_scaled)
+cumvar = np.cumsum(pca_full.explained_variance_ratio_)
+
+n_95 = int(np.argmax(cumvar >= 0.95) + 1)
+n_99 = int(np.argmax(cumvar >= 0.99) + 1)
+
+fig, ax = plt.subplots(figsize=(10, 5.5))
+ax.plot(range(1, len(cumvar) + 1), cumvar, color="#3498db", linewidth=2)
+ax.fill_between(range(1, len(cumvar) + 1), cumvar, alpha=0.1, color="#3498db")
+ax.axhline(y=0.95, color="#e74c3c", linestyle="--", linewidth=1, label=f"95% variance (n={n_95})")
+ax.axhline(y=0.99, color="#2ecc71", linestyle="--", linewidth=1, label=f"99% variance (n={n_99})")
+ax.axvline(x=200, color="#9b59b6", linestyle=":", alpha=0.6, label="PCA-200 (our choice)")
+ax.axvline(x=n_95, color="#e74c3c", linestyle=":", alpha=0.3)
+ax.axvline(x=n_99, color="#2ecc71", linestyle=":", alpha=0.3)
+ax.set_xlabel("Number of Principal Components")
+ax.set_ylabel("Cumulative Explained Variance Ratio")
+ax.set_title(f"PCA on Fused Features — 95% at {n_95}, 99% at {n_99} components")
+ax.legend(fontsize=10)
+ax.grid(True, alpha=0.25)
+ax.set_ylim(0, 1.02)
+plt.tight_layout()
+plt.savefig(os.path.join(PLOTS_DIR, "pca_explained_variance.png"))
+plt.close()
+
+
+print("[4/8] accuracy_vs_f1.png")
+fig, ax = plt.subplots(figsize=(9, 7))
+sc = ax.scatter(df["test_accuracy"], df["test_f1"], s=110,
+                c=df["test_accuracy"], cmap="viridis", edgecolors="black",
+                linewidths=0.8, zorder=5)
+for _, row in df.iterrows():
+    label = row["model"].replace("_", " ").title()
+    ax.annotate(label, (row["test_accuracy"] + 0.003, row["test_f1"] - 0.003),
+                fontsize=7.5, alpha=0.85)
+lims = [min(df["test_accuracy"].min(), df["test_f1"].min()) - 0.05, 1.0]
+ax.plot(lims, lims, "k--", alpha=0.25, label="y = x (perfect correlation)")
+ax.set_xlabel("Test Accuracy")
+ax.set_ylabel("Test F1 Score (Macro)")
+ax.set_title("Accuracy vs F1 — Metric Agreement Analysis")
+ax.legend(fontsize=10)
+ax.grid(True, alpha=0.25)
+plt.tight_layout()
+plt.savefig(os.path.join(PLOTS_DIR, "accuracy_vs_f1.png"))
+plt.close()
