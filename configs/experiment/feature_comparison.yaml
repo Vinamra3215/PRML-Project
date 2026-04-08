@@ -1,0 +1,6 @@
+defaults:
+  - /model: svm_rbf
+
+sweep:
+  features: [histogram, hog, cnn, fused]
+  reduction: [none]
