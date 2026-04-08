@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+*.so
+
+# Virtual Environments
+.env
+.venv/
+env/
+
+# Data 
+data/
+*.h5
+*.hdf5
+*.tar.gz
+*.zip
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Experiment outputs 
+outputs/
+multirun/
+wandb/
+
+# Slurm
+slurm-*.out
+*.slurm
+slurm/
+results/slurm_*
+*.err
+
+# Misc
+*.log
+download_data.py
