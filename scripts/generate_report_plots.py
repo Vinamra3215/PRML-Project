@@ -237,3 +237,76 @@ with open(os.path.join(METRICS_DIR, f"classification_report_{BEST_MODEL}.txt"), 
     f.write(f"Classification Report — {BEST_MODEL} ({BEST_FEATURE} features)\n")
     f.write("=" * 60 + "\n")
     f.write(report)
+
+print("[7/8] runtime_comparison.png")
+fig, ax = plt.subplots(figsize=(12, max(6, len(df) * 0.4)))
+df_time = df.sort_values("time_seconds")
+labels_t = df_time["model"].str.replace("_", " ").str.title() + "  (" + df_time["feature"] + ")"
+cmap_t = plt.cm.plasma(np.linspace(0.15, 0.85, len(df_time)))
+bars_t = ax.barh(labels_t, df_time["time_seconds"], color=cmap_t, edgecolor="white", linewidth=0.5)
+ax.set_xlabel("Time (seconds)")
+ax.set_title("Computational Cost — Training + Evaluation Runtime")
+for bar, t in zip(bars_t, df_time["time_seconds"]):
+    ax.text(t + max(df_time["time_seconds"]) * 0.01, bar.get_y() + bar.get_height() / 2,
+            f"{t:.0f}s", va="center", fontsize=8)
+plt.tight_layout()
+plt.savefig(os.path.join(PLOTS_DIR, "runtime_comparison.png"))
+plt.close()
+
+print("[8/8] cnn_loss_curve.png")
+
+history_path = os.path.join(METRICS_DIR, "cnn_history.json")
+
+if os.path.exists(history_path):
+    with open(history_path) as f:
+        history = json.load(f)
+    train_losses = history["train_loss"]
+    val_losses = history["val_loss"]
+    print("  Loaded loss history from cnn_history.json")
+else:
+    print("  cnn_history.json not found — training MLP for loss curve...")
+    from sklearn.metrics import log_loss as _log_loss
+    from sklearn.neural_network import MLPClassifier
+
+    pca_r = PCA(n_components=200, random_state=42)
+    sc2 = StandardScaler()
+    X_tr_pca = pca_r.fit_transform(sc2.fit_transform(X_train))
+    X_te_pca = pca_r.transform(sc2.transform(X_test))
+
+    mlp = MLPClassifier(
+        hidden_layer_sizes=(512, 256), activation="relu", solver="adam",
+        learning_rate_init=0.001, batch_size=256,
+        max_iter=1, warm_start=True, random_state=42,
+    )
+    n_ep = 50
+    train_losses, val_losses = [], []
+    classes = np.unique(y_train)
+    for epoch in range(n_ep):
+        mlp.max_iter = epoch + 1
+        mlp.fit(X_tr_pca, y_train)
+        train_losses.append(float(mlp.loss_))
+        val_proba = mlp.predict_proba(X_te_pca)
+        val_losses.append(float(_log_loss(y_test, val_proba, labels=classes)))
+    with open(history_path, "w") as f:
+        json.dump({"train_loss": train_losses, "val_loss": val_losses}, f, indent=2)
+
+n_epochs = len(train_losses)
+fig, ax = plt.subplots(figsize=(10, 6))
+epochs = range(1, n_epochs + 1)
+ax.plot(epochs, train_losses, "b-", linewidth=2, label="Training Loss", marker="o", markersize=3)
+ax.plot(epochs, val_losses, "r-", linewidth=2, label="Validation Loss", marker="s", markersize=3)
+best_epoch = int(np.argmin(val_losses)) + 1
+best_val = min(val_losses)
+ax.axvline(x=best_epoch, color="green", linestyle=":", alpha=0.6,
+           label=f"Best validation (epoch {best_epoch})")
+ax.scatter([best_epoch], [best_val], color="green", s=80, zorder=5, edgecolors="black")
+ax.set_xlabel("Epoch")
+ax.set_ylabel("Loss (Cross-Entropy)")
+ax.set_title("Neural Network Training Dynamics — Training vs Validation Loss")
+ax.legend(fontsize=10)
+ax.grid(True, alpha=0.25)
+ax.set_xlim(1, n_epochs)
+plt.tight_layout()
+plt.savefig(os.path.join(PLOTS_DIR, "cnn_loss_curve.png"))
+plt.close()
+
