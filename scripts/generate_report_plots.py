@@ -310,3 +310,44 @@ plt.tight_layout()
 plt.savefig(os.path.join(PLOTS_DIR, "cnn_loss_curve.png"))
 plt.close()
 
+
+print("\nSaving comparison tables...")
+
+if df_no_pca is not None:
+    save_comparison_table(df_no_pca,
+                          "Table 1: Model Comparison — No PCA (Raw Dimensions)",
+                          "comparison_table_no_pca.csv", "comparison_no_pca.md")
+
+if df_with_pca is not None:
+    save_comparison_table(df_with_pca,
+                          "Table 2: Model Comparison — With PCA (200 Components)",
+                          "comparison_table_with_pca.csv", "comparison_with_pca.md")
+
+
+print("\nCleaning up old plots...")
+unwanted = [
+    "confusion_logistic.png", "confusion_random_forest.png", "confusion_svm_rbf.png",
+    "dendrogram_cnn.png", "elbow_cnn.png", "bic_aic_cnn.png",
+]
+for fname in unwanted:
+    path = os.path.join(PLOTS_DIR, fname)
+    if os.path.exists(path):
+        os.remove(path)
+        print(f"  Removed {fname}")
+
+for fname in ["classification_report_logistic.txt", "classification_report_random_forest.txt",
+              "classification_report_svm_rbf.txt"]:
+    path = os.path.join(METRICS_DIR, fname)
+    if os.path.exists(path):
+        os.remove(path)
+        print(f"  Removed {fname}")
+
+
+print(f"\n{'=' * 60}")
+print("DONE — 8 plots generated")
+print(f"{'=' * 60}")
+final_plots = sorted(os.listdir(PLOTS_DIR))
+for p in final_plots:
+    size_kb = os.path.getsize(os.path.join(PLOTS_DIR, p)) // 1024
+    print(f"  {p}  ({size_kb} KB)")
+print(f"\nTotal: {len(final_plots)} plots in {PLOTS_DIR}/")
