@@ -154,6 +154,63 @@ def run_phase(reducer, reducer_params, output_csv, label, use_wandb):
         print(f"{'=' * 60}")
         print_model_ranking(df)
 
+def run_phase_cnn_loss(use_wandb):
+    """Train MLP and record loss curve (no ResNet, pure MLP only)."""
+    from sklearn.neural_network import MLPClassifier
+    from sklearn.decomposition import PCA
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.metrics import log_loss
+
+    print(f"\n{'#' * 70}")
+    print(f"  PHASE 3: MLP Training Loss Curve")
+    print(f"{'#' * 70}")
+
+    # Use fused features (handcrafted only)
+    X_train, y_train = load_features(CACHE_DIR, "fused", "train")
+    X_test, y_test = load_features(CACHE_DIR, "fused", "test")
+
+    sc = StandardScaler()
+    pca = PCA(n_components=200, random_state=42)
+    X_tr = pca.fit_transform(sc.fit_transform(X_train))
+    X_te = pca.transform(sc.transform(X_test))
+
+    mlp = MLPClassifier(
+        hidden_layer_sizes=(512, 256), activation="relu", solver="adam",
+        learning_rate_init=0.001, batch_size=256,
+        max_iter=1, warm_start=True, random_state=42,
+    )
+
+    n_epochs = 50
+    history = {"train_loss": [], "val_loss": []}
+    classes = np.unique(y_train)
+
+    if use_wandb:
+        init_wandb(config={"type": "mlp_loss_curve", "epochs": n_epochs},
+                   run_name="mlp_loss_curve", tags=["mlp", "loss_curve"])
+
+    for epoch in tqdm(range(n_epochs), desc="MLP Training", unit="epoch", ncols=80):
+        mlp.max_iter = epoch + 1
+        mlp.fit(X_tr, y_train)
+        history["train_loss"].append(float(mlp.loss_))
+
+        val_proba = mlp.predict_proba(X_te)
+        v_loss = log_loss(y_test, val_proba, labels=classes)
+        history["val_loss"].append(float(v_loss))
+
+        if use_wandb:
+            log_wandb({"epoch": epoch + 1, "train_loss": mlp.loss_, "val_loss": v_loss})
+
+        if (epoch + 1) % 10 == 0:
+            print(f"  Epoch {epoch+1:3d}: train_loss={mlp.loss_:.4f}  val_loss={v_loss:.4f}", flush=True)
+
+    if use_wandb:
+        finish_wandb()
+
+    history_path = os.path.join(RESULTS_DIR, "cnn_history.json")
+    with open(history_path, "w") as f:
+        json.dump(history, f, indent=2)
+    print(f"\nLoss curve history saved to {history_path}")
+    return history
 
 def main():
     parser = argparse.ArgumentParser(description="Run all experiments")
@@ -183,6 +240,10 @@ def main():
     if phase in (0, 2):
         run_phase("pca", {"n_components": PCA_COMPONENTS}, "master_with_pca.csv",
                   f"PHASE 2: With PCA ({PCA_COMPONENTS} dimensions)", use_wandb)
+    
+    if phase in (0, 3):
+        run_phase_cnn_loss(use_wandb)
+
 
     total_time = time.time() - start
     print(f"\n{'=' * 70}")
