@@ -113,4 +113,32 @@ def run_experiment(
         })
         finish_wandb()
 
+    run_data = {
+        "run_id": rid,
+        "feature": feature_type,
+        "reducer": reducer_name,
+        "model": model_name,
+        "cv_accuracy": round(cv_acc, 4),
+        "cv_f1": round(cv_f1, 4),
+        "test_accuracy": round(test_metrics["accuracy"], 4),
+        "test_f1": round(test_metrics["f1_macro"], 4),
+        "time_seconds": round(elapsed, 2),
+    }
+    append_result(results_dir, run_data, csv_name=output_csv)
+
+    log_experiment_csv(results_dir, {
+        "run_id": rid,
+        "model": model_name,
+        "feature": feature_type,
+        "reducer": reducer_name,
+        "params": best_params if best_params else model_params,
+        "cv_accuracy": round(cv_acc, 4),
+        "cv_f1": round(cv_f1, 4),
+        "test_accuracy": round(test_metrics["accuracy"], 4),
+        "test_f1": round(test_metrics["f1_macro"], 4),
+        "test_precision": round(test_metrics.get("precision_macro", 0), 4),
+        "test_recall": round(test_metrics.get("recall_macro", 0), 4),
+        "runtime": round(elapsed, 2),
+    })
+
     return pipeline, test_metrics, y_pred, best_params
