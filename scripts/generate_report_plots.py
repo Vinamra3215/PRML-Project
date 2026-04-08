@@ -187,3 +187,53 @@ ax.grid(True, alpha=0.25)
 plt.tight_layout()
 plt.savefig(os.path.join(PLOTS_DIR, "accuracy_vs_f1.png"))
 plt.close()
+
+print("[5/8] cv_vs_test_accuracy.png")
+fig, ax = plt.subplots(figsize=(9, 7))
+sc = ax.scatter(df["cv_accuracy"], df["test_accuracy"], s=120,
+                c=df["test_accuracy"], cmap="viridis", edgecolors="black",
+                linewidths=0.8, zorder=5)
+for _, row in df.iterrows():
+    label = row["model"].replace("_", " ").split()[0].title()
+    ax.annotate(label, (row["cv_accuracy"] + 0.003, row["test_accuracy"] - 0.003),
+                fontsize=8, alpha=0.85)
+lims2 = [min(df["cv_accuracy"].min(), df["test_accuracy"].min()) - 0.05, 1.0]
+ax.plot(lims2, lims2, "k--", alpha=0.25, label="Perfect generalization (CV = Test)")
+ax.set_xlabel("Cross-Validation Accuracy (5-Fold)")
+ax.set_ylabel("Test Set Accuracy")
+ax.set_title("Generalization Analysis — CV vs Test Accuracy")
+ax.legend(fontsize=10, loc="upper left")
+ax.grid(True, alpha=0.25)
+plt.tight_layout()
+plt.savefig(os.path.join(PLOTS_DIR, "cv_vs_test_accuracy.png"))
+plt.close()
+
+print(f"[6/8] confusion_best_model.png ({BEST_MODEL} on {BEST_FEATURE})")
+X_tr_cm, y_tr_cm = load_features("data/cache", BEST_FEATURE, "train")
+X_te_cm, y_te_cm = load_features("data/cache", BEST_FEATURE, "test")
+
+# Build and train best model pipeline (with GridSearch best params if available)
+pipe = build_pipeline(BEST_MODEL, {})
+pipe.fit(X_tr_cm, y_tr_cm)
+y_pred = pipe.predict(X_te_cm)
+
+cm = confusion_matrix(y_te_cm, y_pred)
+fig, ax = plt.subplots(figsize=(13, 11))
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax,
+            xticklabels=class_names, yticklabels=class_names,
+            linewidths=0.3, linecolor="white")
+ax.set_xlabel("Predicted Label", fontsize=12)
+ax.set_ylabel("True Label", fontsize=12)
+ax.set_title(f"Confusion Matrix — {BEST_MODEL.replace('_',' ').title()} "
+             f"({BEST_FEATURE} features)", fontsize=14, fontweight="bold")
+plt.xticks(rotation=45, ha="right", fontsize=9)
+plt.yticks(rotation=0, fontsize=9)
+plt.tight_layout()
+plt.savefig(os.path.join(PLOTS_DIR, "confusion_best_model.png"))
+plt.close()
+
+report = get_classification_report(y_te_cm, y_pred, class_names=class_names)
+with open(os.path.join(METRICS_DIR, f"classification_report_{BEST_MODEL}.txt"), "w") as f:
+    f.write(f"Classification Report — {BEST_MODEL} ({BEST_FEATURE} features)\n")
+    f.write("=" * 60 + "\n")
+    f.write(report)
