@@ -392,7 +392,3 @@ results/
 5. **Reproducibility**: Fixed seed (42), stratified splits, cached features, detailed experiment logging.
 
 ---
-
-## 📜 License
-
-MIT License — Educational Project
