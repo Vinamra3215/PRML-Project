@@ -101,3 +101,63 @@ def create_objective(feature_type, model_name, cache_dir="data/cache",
         return mean_f1
 
     return objective, X_train, y_train
+
+
+def run_sweep(feature_type, model_name, n_trials=30, cache_dir="data/cache",
+              cv_folds=5, reducer_name="none", reducer_params=None,
+              use_wandb=False, results_dir="results/metrics"):
+    print(f"\n{'=' * 60}")
+    print(f"Optuna Sweep: {model_name} | {feature_type} | {n_trials} trials")
+    print(f"{'=' * 60}")
+
+    if use_wandb:
+        init_wandb(
+            config={"model": model_name, "features": feature_type,
+                    "n_trials": n_trials, "reducer": reducer_name},
+            run_name=f"sweep_{model_name}_{feature_type}",
+            tags=["sweep", model_name, feature_type],
+        )
+
+    objective, _, _ = create_objective(
+        feature_type, model_name, cache_dir, cv_folds,
+        reducer_name, reducer_params, use_wandb,
+    )
+
+    study = optuna.create_study(
+        direction="maximize",
+        sampler=optuna.samplers.TPESampler(seed=42),
+        study_name=f"{model_name}_{feature_type}",
+    )
+    study.optimize(objective, n_trials=n_trials, show_progress_bar=True)
+
+    print(f"\nBest trial #{study.best_trial.number}:")
+    print(f"  F1 (macro): {study.best_trial.value:.4f}")
+    print(f"  Best params: {study.best_trial.params}")
+
+    if use_wandb:
+        log_wandb({
+            "best_f1": study.best_trial.value,
+            "best_trial": study.best_trial.number,
+            **{f"best_{k}": v for k, v in study.best_trial.params.items()},
+        })
+        finish_wandb()
+
+    os.makedirs(results_dir, exist_ok=True)
+    sweep_file = os.path.join(results_dir, f"sweep_{model_name}_{feature_type}.json")
+    sweep_data = {
+        "model": model_name,
+        "feature": feature_type,
+        "reducer": reducer_name,
+        "n_trials": n_trials,
+        "best_f1": round(study.best_trial.value, 4),
+        "best_params": study.best_trial.params,
+        "all_trials": [
+            {"number": t.number, "value": round(t.value, 4), "params": t.params}
+            for t in study.trials
+        ],
+    }
+    with open(sweep_file, "w") as f:
+        json.dump(sweep_data, f, indent=2, default=str)
+    print(f"  Saved to {sweep_file}")
+
+    return study
