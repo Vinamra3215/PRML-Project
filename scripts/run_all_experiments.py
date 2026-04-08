@@ -180,6 +180,19 @@ def main():
         run_phase("none", None, "master_no_pca.csv",
                   "PHASE 1: No PCA (Raw Dimensions)", use_wandb)
 
+    if phase in (0, 2):
+        run_phase("pca", {"n_components": PCA_COMPONENTS}, "master_with_pca.csv",
+                  f"PHASE 2: With PCA ({PCA_COMPONENTS} dimensions)", use_wandb)
+
+    total_time = time.time() - start
+    print(f"\n{'=' * 70}")
+    print(f"  ALL DONE in {total_time:.0f}s ({total_time/60:.1f} min)")
+    print(f"{'=' * 70}")
+    print(f"  Results: {RESULTS_DIR}/")
+    print(f"   - master_no_pca.csv      (Table 1)")
+    print(f"   - master_with_pca.csv    (Table 2)")
+    print(f"   - experiment_log.csv     (Detailed log)")
+
 
 if __name__ == "__main__":
     main()
