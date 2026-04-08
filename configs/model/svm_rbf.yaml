@@ -1,6 +1,0 @@
-_target_: sklearn.svm.SVC
-kernel: rbf
-C: 1.0
-gamma: scale
-probability: true
-random_state: 42

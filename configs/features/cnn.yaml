@@ -1,3 +1,0 @@
-_target_: src.features.cnn_embeddings.CNNEmbeddingExtractor
-backbone: resnet50
-device: cuda

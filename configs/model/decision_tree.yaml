@@ -1,4 +1,0 @@
-_target_: sklearn.tree.DecisionTreeClassifier
-max_depth: 20
-min_samples_split: 5
-random_state: 42
