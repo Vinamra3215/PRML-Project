@@ -155,7 +155,7 @@ def run_phase(reducer, reducer_params, output_csv, label, use_wandb):
         print_model_ranking(df)
 
 def run_phase_cnn_loss(use_wandb):
-    """Train MLP and record loss curve (no ResNet, pure MLP only)."""
+    
     from sklearn.neural_network import MLPClassifier
     from sklearn.decomposition import PCA
     from sklearn.preprocessing import StandardScaler
@@ -212,6 +212,25 @@ def run_phase_cnn_loss(use_wandb):
     print(f"\nLoss curve history saved to {history_path}")
     return history
 
+def run_phase_summary():
+    
+    print(f"\n{'#' * 70}")
+    print(f"  PHASE 4: Auto Summary")
+    print(f"{'#' * 70}")
+
+    for csv_name, label in [("master_no_pca.csv", "No PCA"),
+                             ("master_with_pca.csv", f"With PCA ({PCA_COMPONENTS})")]:
+        csv_path = os.path.join(RESULTS_DIR, csv_name)
+        if os.path.exists(csv_path):
+            df = pd.read_csv(csv_path).dropna(subset=["test_accuracy"])
+            print(f"\n--- {label} ---")
+            summary = generate_auto_summary(df)
+            print(summary)
+            summary_path = os.path.join(RESULTS_DIR, f"summary_{csv_name.replace('.csv', '.txt')}")
+            with open(summary_path, "w") as f:
+                f.write(summary)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run all experiments")
     parser.add_argument("--wandb", action="store_true", help="Enable W&B tracking")
@@ -244,6 +263,8 @@ def main():
     if phase in (0, 3):
         run_phase_cnn_loss(use_wandb)
 
+    if phase in (0, 4):
+        run_phase_summary()
 
     total_time = time.time() - start
     print(f"\n{'=' * 70}")
