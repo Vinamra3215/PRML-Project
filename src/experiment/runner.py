@@ -21,7 +21,6 @@ def run_experiment(
     cv_folds=5, run_id=None, use_wandb=False,
     output_csv="master.csv", use_grid_search=True,
 ):
-    
     model_params = model_params or {}
     reducer_params = reducer_params or {}
     rid = run_id or f"{model_name}_{feature_type}_{reducer_name}"
@@ -31,6 +30,17 @@ def run_experiment(
     print(f"GridSearch: {'ON' if use_grid_search else 'OFF'}")
     print(f"{'=' * 60}")
 
+    if use_wandb:
+        config = {
+            "model": model_name,
+            "features": feature_type,
+            "reducer": reducer_name,
+            "cv_folds": cv_folds,
+            "grid_search": use_grid_search,
+        }
+        tags = [model_name, feature_type, reducer_name]
+        init_wandb(config=config, run_name=rid, tags=tags)
+
     X_train, y_train = load_features(cache_dir, feature_type, "train")
     X_test, y_test = load_features(cache_dir, feature_type, "test")
 
@@ -38,7 +48,6 @@ def run_experiment(
 
     with Timer("Total experiment") as timer:
         if use_grid_search:
-            
             param_grid = get_param_grid(model_name)
             if param_grid:
                 pipeline = build_pipeline(model_name, {}, reducer_name, reducer_params)
@@ -62,7 +71,6 @@ def run_experiment(
                 print(f"  Best params: {best_params}")
                 print(f"  Best CV F1:  {cv_f1:.4f}")
 
-                
                 from sklearn.model_selection import cross_val_score
                 cv_acc_scores = cross_val_score(
                     pipeline, X_train, y_train,
@@ -70,7 +78,6 @@ def run_experiment(
                 )
                 cv_acc = cv_acc_scores.mean()
             else:
-                
                 pipeline = build_pipeline(model_name, model_params, reducer_name, reducer_params)
                 cv_results = stratified_cv(pipeline, X_train, y_train, k=cv_folds)
                 print_cv_results(cv_results, model_name)
@@ -78,7 +85,6 @@ def run_experiment(
                 cv_f1 = cv_results["test_f1_macro"].mean()
                 pipeline.fit(X_train, y_train)
         else:
-            
             pipeline = build_pipeline(model_name, model_params, reducer_name, reducer_params)
             cv_results = stratified_cv(pipeline, X_train, y_train, k=cv_folds)
             print_cv_results(cv_results, model_name)
@@ -86,16 +92,25 @@ def run_experiment(
             cv_f1 = cv_results["test_f1_macro"].mean()
             pipeline.fit(X_train, y_train)
 
-        
         test_metrics, y_pred, y_prob = evaluate(pipeline, X_test, y_test)
 
     elapsed = timer.elapsed
 
-    
     print(f"\nTest Results:")
     for k, v in test_metrics.items():
         if v is not None:
             print(f"  {k}: {v:.4f}")
     print(f"  Time: {elapsed:.1f}s")
+
+    if use_wandb:
+        log_wandb({
+            "cv_accuracy": cv_acc,
+            "cv_f1": cv_f1,
+            "test_accuracy": test_metrics["accuracy"],
+            "test_f1_macro": test_metrics["f1_macro"],
+            "runtime_seconds": elapsed,
+            **{f"best_{k}": v for k, v in best_params.items()},
+        })
+        finish_wandb()
 
     return pipeline, test_metrics, y_pred, best_params
