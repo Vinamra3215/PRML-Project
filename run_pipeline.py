@@ -85,3 +85,23 @@ def _organize_extracted():
         print("[ERROR] Dataset extraction failed.")
         print(f"  Expected: {images_dir}/<class>/<image>.jpg")
         sys.exit(1)
+
+
+def run_step(description, script_path, extra_args=None):
+    print(f"\n{'=' * 70}")
+    print(f"  {description}")
+    print(f"  Running: python {script_path}")
+    print(f"{'=' * 70}\n")
+
+    cmd = [sys.executable, script_path]
+    if extra_args:
+        cmd.extend(extra_args)
+
+    result = subprocess.run(cmd, cwd=PROJECT_DIR)
+
+    if result.returncode != 0:
+        print(f"\n[ERROR] {description} failed with exit code {result.returncode}")
+        print(f"  Re-run manually: python {script_path}")
+        sys.exit(result.returncode)
+
+    print(f"\n[OK] {description} completed successfully!")
