@@ -23,29 +23,38 @@ A comprehensive Food-101 image classification system using **only classical mach
 
 ## 🚀 Quick Start
 
+**One command runs the entire project** — dataset download, feature extraction, experiments, and plots.
+
 ```bash
-# 1. Clone and setup
+# 1. Clone the repo
 git clone https://github.com/Vinamra3215/PRML-Project.git
 cd PRML-Project
-conda env create -f environment.yml
-conda activate food-prml
 
-# 2. Place Food-101 dataset
-# Download from Kaggle and extract to data/
-# Expected structure: data/images/<class_name>/<image_id>.jpg
-#                     data/meta/meta/classes.txt, train.json, test.json
+# 2. Create virtual environment and install dependencies
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
 
-# 3. Extract features (one-time, cached as HDF5)
-python scripts/extract_features.py
+# 3. Run the full pipeline (downloads data, extracts features, trains, plots)
+python run_pipeline.py
+```
 
-# 4. Run all experiments (Phase 1: No PCA + Phase 2: PCA-200)
-python scripts/run_all_experiments.py
+That's it! `run_pipeline.py` automatically:
+- Downloads Food-101 dataset (~4.6 GB) if not already present
+- Extracts 5 feature types and caches them as HDF5
+- Runs 7 models × 5 features × 2 phases (45 experiments total)
+- Generates 8 analysis plots
+- Saves all results to `results/metrics/` and `results/plots/`
 
-# 5. Generate analysis plots
-python scripts/generate_report_plots.py
+> **Dataset Download**: The script tries Kaggle API first (if configured), then falls back to direct download from ETH Zurich.
+> To setup Kaggle API: place `kaggle.json` in `~/.kaggle/` and run `pip install kaggle`.
 
-# 6. Run unit tests
-python -m pytest tests/
+### Run individual steps manually
+```bash
+python scripts/extract_features.py        # Extract features only
+python scripts/run_all_experiments.py     # Run experiments only
+python scripts/generate_report_plots.py   # Generate plots only
+python -m pytest tests/ -v                # Run unit tests
 ```
 
 ---
