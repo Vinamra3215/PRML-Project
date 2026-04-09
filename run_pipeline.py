@@ -24,21 +24,26 @@ def download_dataset():
 
     os.makedirs(DATA_DIR, exist_ok=True)
 
-    try:
-        import kaggle
-        print("[DOWNLOAD] Downloading Food-101 from Kaggle...")
-        kaggle.api.authenticate()
-        kaggle.api.dataset_download_files(
-            "dansbecker/food-101", path=DATA_DIR, unzip=False
-        )
-        zip_path = os.path.join(DATA_DIR, "food-101.zip")
-        if os.path.exists(zip_path):
-            print("[EXTRACT] Extracting zip...")
-            with zipfile.ZipFile(zip_path, "r") as zf:
-                zf.extractall(DATA_DIR)
-            os.remove(zip_path)
-    except Exception as e:
-        print(f"[INFO] Kaggle API not available ({e}), trying direct download...")
+    kaggle_creds = os.path.expanduser("~/.kaggle/kaggle.json")
+    if os.path.exists(kaggle_creds):
+        try:
+            import kaggle
+            print("[DOWNLOAD] Kaggle credentials found. Downloading Food-101 from Kaggle...")
+            kaggle.api.authenticate()
+            kaggle.api.dataset_download_files(
+                "dansbecker/food-101", path=DATA_DIR, unzip=False
+            )
+            zip_path = os.path.join(DATA_DIR, "food-101.zip")
+            if os.path.exists(zip_path):
+                print("[EXTRACT] Extracting zip...")
+                with zipfile.ZipFile(zip_path, "r") as zf:
+                    zf.extractall(DATA_DIR)
+                os.remove(zip_path)
+        except Exception as e:
+            print(f"[INFO] Kaggle download failed ({e}), falling back to direct download...")
+            _download_direct()
+    else:
+        print("[INFO] No Kaggle credentials (~/.kaggle/kaggle.json) found.")
         _download_direct()
 
     _organize_extracted()
