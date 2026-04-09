@@ -148,3 +148,39 @@ def print_results_summary():
             print(f"    Model: {best['model']}  |  Features: {best['feature']}  |  Accuracy: {best['test_accuracy']:.4f}")
     except ImportError:
         pass
+
+
+def main():
+    print(f"\n{'#' * 70}")
+    print(f"  FOOD-101 CLASSIFICATION — FULL PIPELINE")
+    print(f"  No pretrained models. Classical ML only.")
+    print(f"{'#' * 70}")
+    print(f"\n  Steps:")
+    print(f"    1. Download & extract Food-101 dataset")
+    print(f"    2. Extract features (Histogram, HOG, LBP, GLCM, Fused)")
+    print(f"    3. Run all experiments (7 models x 5 features x 2 phases)")
+    print(f"    4. Generate analysis plots (8 total)")
+    print(f"\n")
+
+    download_dataset()
+
+    run_step(
+        "STEP 2: Feature Extraction (Histogram, HOG, LBP, GLCM, Fused)",
+        "scripts/extract_features.py",
+    )
+
+    run_step(
+        "STEP 3: Run All Experiments (Phase 1: No PCA + Phase 2: PCA-200)",
+        "scripts/run_all_experiments.py",
+    )
+
+    run_step(
+        "STEP 4: Generate Analysis Plots (8 plots)",
+        "scripts/generate_report_plots.py",
+    )
+
+    print_results_summary()
+
+
+if __name__ == "__main__":
+    main()
