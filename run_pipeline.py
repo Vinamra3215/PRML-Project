@@ -105,3 +105,46 @@ def run_step(description, script_path, extra_args=None):
         sys.exit(result.returncode)
 
     print(f"\n[OK] {description} completed successfully!")
+
+
+def print_results_summary():
+    print(f"\n{'=' * 70}")
+    print(f"  PIPELINE COMPLETE!")
+    print(f"{'=' * 70}")
+
+    metrics_dir = os.path.join(RESULTS_DIR, "metrics")
+    plots_dir = os.path.join(RESULTS_DIR, "plots")
+
+    print(f"\n  Results saved to: {RESULTS_DIR}/")
+
+    if os.path.isdir(metrics_dir):
+        print(f"\n  Metrics:")
+        for f in sorted(os.listdir(metrics_dir)):
+            fpath = os.path.join(metrics_dir, f)
+            size = os.path.getsize(fpath)
+            print(f"    {f:<40s} ({size:>6,} bytes)")
+
+    if os.path.isdir(plots_dir):
+        print(f"\n  Plots:")
+        for f in sorted(os.listdir(plots_dir)):
+            fpath = os.path.join(plots_dir, f)
+            size = os.path.getsize(fpath)
+            print(f"    {f:<40s} ({size:>6,} bytes)")
+
+    try:
+        import pandas as pd
+        no_pca = os.path.join(metrics_dir, "master_no_pca.csv")
+        if os.path.exists(no_pca):
+            df = pd.read_csv(no_pca)
+            best = df.loc[df["test_accuracy"].idxmax()]
+            print(f"\n  Best Result (No PCA):")
+            print(f"    Model: {best['model']}  |  Features: {best['feature']}  |  Accuracy: {best['test_accuracy']:.4f}")
+
+        with_pca = os.path.join(metrics_dir, "master_with_pca.csv")
+        if os.path.exists(with_pca):
+            df = pd.read_csv(with_pca)
+            best = df.loc[df["test_accuracy"].idxmax()]
+            print(f"\n  Best Result (PCA-200):")
+            print(f"    Model: {best['model']}  |  Features: {best['feature']}  |  Accuracy: {best['test_accuracy']:.4f}")
+    except ImportError:
+        pass
