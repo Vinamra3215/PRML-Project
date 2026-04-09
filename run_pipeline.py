@@ -77,6 +77,18 @@ def _organize_extracted():
                 shutil.move(src, dst)
         shutil.rmtree(extracted_root, ignore_errors=True)
 
+    meta_dir = os.path.join(DATA_DIR, "meta")
+    meta_meta_dir = os.path.join(meta_dir, "meta")
+    classes_file = os.path.join(meta_meta_dir, "classes.txt")
+    if os.path.isdir(meta_dir) and not os.path.exists(classes_file):
+        os.makedirs(meta_meta_dir, exist_ok=True)
+        for fname in os.listdir(meta_dir):
+            src = os.path.join(meta_dir, fname)
+            dst = os.path.join(meta_meta_dir, fname)
+            if os.path.isfile(src) and not os.path.exists(dst):
+                shutil.copy2(src, dst)
+        print(f"[OK] Meta files organized into {meta_meta_dir}")
+
     images_dir = os.path.join(DATA_DIR, "images")
     if os.path.isdir(images_dir):
         n_classes = len(os.listdir(images_dir))
