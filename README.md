@@ -32,7 +32,12 @@ cd PRML-Project
 
 # 2. Create virtual environment and install dependencies
 python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+
+# Activate — choose your OS:
+source venv/bin/activate          # Linux / macOS
+venv\Scripts\activate             # Windows PowerShell
+venv\Scripts\activate.bat         # Windows CMD
+
 pip install -r requirements.txt
 
 # 3. Run the full pipeline (downloads data, extracts features, trains, plots)
