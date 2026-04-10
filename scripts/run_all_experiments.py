@@ -54,12 +54,15 @@ def run_single(model_name, feature_type, reducer, reducer_params,
 
     t0 = time.time()
 
+    high_dim = X_train.shape[1] > 5000
+    n_jobs = 1 if high_dim else -1
+
     if param_grid:
-        print(f"  GridSearchCV: searching {len(param_grid)} param groups...")
+        print(f"  GridSearchCV: searching {len(param_grid)} param groups... (n_jobs={n_jobs})")
         grid = GridSearchCV(
             pipeline, param_grid,
             cv=CV_FOLDS, scoring="f1_macro",
-            n_jobs=-1, refit=True, verbose=0,
+            n_jobs=n_jobs, refit=True, verbose=0,
         )
         grid.fit(X_train, y_train)
         pipeline = grid.best_estimator_
@@ -69,7 +72,7 @@ def run_single(model_name, feature_type, reducer, reducer_params,
         from sklearn.model_selection import cross_val_score
         cv_acc = cross_val_score(
             pipeline, X_train, y_train, cv=CV_FOLDS,
-            scoring="accuracy", n_jobs=-1
+            scoring="accuracy", n_jobs=n_jobs
         ).mean()
 
         print(f"  Best params: {best_params}")
@@ -126,8 +129,14 @@ def run_phase(reducer, reducer_params, output_csv, label, use_wandb):
     print(f"{'#' * 70}", flush=True)
 
     csv_path = os.path.join(RESULTS_DIR, output_csv)
+    completed_ids = set()
     if os.path.exists(csv_path):
-        os.remove(csv_path)
+        try:
+            existing = pd.read_csv(csv_path)
+            completed_ids = set(existing["run_id"].tolist())
+            print(f"  [RESUME] Found {len(completed_ids)} completed experiments in {output_csv}")
+        except Exception:
+            completed_ids = set()
 
     results = []
     total = len(MODELS) * len(FEATURE_TYPES)
@@ -136,7 +145,11 @@ def run_phase(reducer, reducer_params, output_csv, label, use_wandb):
     pbar = tqdm(combos, desc=label, unit="exp", ncols=100,
                 bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]")
     for feature_type, model_name in pbar:
+        rid = f"{model_name}_{feature_type}_{reducer}"
         pbar.set_postfix_str(f"{model_name} | {feature_type}", refresh=True)
+        if rid in completed_ids:
+            print(f"\n[SKIP] {model_name} | {feature_type} | reducer={reducer} (already done)")
+            continue
         print(f"\n[{pbar.n+1}/{total}] {model_name} | {feature_type} | reducer={reducer}")
         print("-" * 50, flush=True)
         try:
