@@ -276,7 +276,7 @@ python scripts/run_sweep.py --model logistic --features hog
 | 5 | `cv_vs_test_accuracy.png` | Generalization gap (bias-variance) |
 | 6 | `confusion_best_model.png` | 20-class confusion matrix for best model |
 | 7 | `runtime_comparison.png` | Computational cost comparison |
-| 8 | `cnn_loss_curve.png` | MLP training vs validation loss |
+| 8 | `mlp_loss_curve.png` | MLP training vs validation loss |
 
 ---
 
@@ -324,20 +324,25 @@ python -m pytest tests/ -v
 
 ## 📦 Dependencies
 
-```
-scikit-learn >= 1.3
-scikit-image
-numpy
-pandas
-matplotlib
-seaborn
-opencv-python-headless
-h5py
-tqdm
-torch
-torchvision
-optuna
-wandb (optional)
+| Package | Version | Purpose |
+|---------|---------|--------|
+| `scikit-learn` | ≥ 1.3 | KNN, Logistic, Naive Bayes, Decision Tree, Perceptron, MLP, GridSearchCV |
+| `scikit-image` | ≥ 0.21 | HOG, LBP, GLCM feature extraction |
+| `numpy` | ≥ 1.24 | Array operations |
+| `pandas` | ≥ 2.0 | Results tables and CSV handling |
+| `matplotlib` | ≥ 3.7 | All analysis plots |
+| `seaborn` | ≥ 0.12 | Confusion matrix heatmap |
+| `opencv-python-headless` | ≥ 4.8 | Image loading and color conversion |
+| `h5py` | ≥ 3.9 | HDF5 feature caching |
+| `tqdm` | ≥ 4.65 | Progress bars |
+| `torch` | ≥ 2.0 | Seed reproducibility only (no model training) |
+| `torchvision` | ≥ 0.15 | Image transform utilities |
+| `optuna` | ≥ 3.3 | Bayesian hyperparameter sweeps |
+| `kaggle` | ≥ 1.5 | Optional: Kaggle dataset download |
+
+Install all at once:
+```bash
+pip install -r requirements.txt
 ```
 
 ---
