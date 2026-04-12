@@ -167,7 +167,7 @@ def run_phase(reducer, reducer_params, output_csv, label, use_wandb):
         print(f"{'=' * 60}")
         print_model_ranking(df)
 
-def run_phase_cnn_loss(use_wandb):
+def run_phase_mlp_loss(use_wandb):
     
     from sklearn.neural_network import MLPClassifier
     from sklearn.decomposition import PCA
@@ -219,7 +219,7 @@ def run_phase_cnn_loss(use_wandb):
     if use_wandb:
         finish_wandb()
 
-    history_path = os.path.join(RESULTS_DIR, "cnn_history.json")
+    history_path = os.path.join(RESULTS_DIR, "mlp_loss_curve.json")
     with open(history_path, "w") as f:
         json.dump(history, f, indent=2)
     print(f"\nLoss curve history saved to {history_path}")
@@ -274,7 +274,7 @@ def main():
                   f"PHASE 2: With PCA ({PCA_COMPONENTS} dimensions)", use_wandb)
     
     if phase in (0, 3):
-        run_phase_cnn_loss(use_wandb)
+        run_phase_mlp_loss(use_wandb)
 
     if phase in (0, 4):
         run_phase_summary()
