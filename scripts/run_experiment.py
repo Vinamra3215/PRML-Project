@@ -7,8 +7,8 @@ from src.experiment.runner import run_experiment
 
 def main():
     parser = argparse.ArgumentParser(description="Run classification experiment")
-    parser.add_argument("--model", default="svm_rbf", help="Model name from registry")
-    parser.add_argument("--features", default="cnn", help="Feature type")
+    parser.add_argument("--model", default="knn", help="Model name from registry")
+    parser.add_argument("--features", default="histogram", help="Feature type")
     parser.add_argument("--reducer", default="none", help="Reducer: none, pca, lda")
     parser.add_argument("--pca-components", type=int, default=100, help="PCA components if reducer=pca")
     parser.add_argument("--cv-folds", type=int, default=5)

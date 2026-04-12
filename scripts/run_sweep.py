@@ -7,8 +7,8 @@ from src.experiment.sweeper import run_sweep
 
 def main():
     parser = argparse.ArgumentParser(description="Run Optuna hyperparameter sweep")
-    parser.add_argument("--model", default="svm_rbf")
-    parser.add_argument("--features", default="cnn")
+    parser.add_argument("--model", default="knn")
+    parser.add_argument("--features", default="histogram")
     parser.add_argument("--n-trials", type=int, default=30)
     parser.add_argument("--cache-dir", default="data/cache")
     parser.add_argument("--results-dir", default="results/metrics")
