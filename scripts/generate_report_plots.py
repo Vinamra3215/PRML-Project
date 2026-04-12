@@ -253,18 +253,18 @@ plt.tight_layout()
 plt.savefig(os.path.join(PLOTS_DIR, "runtime_comparison.png"))
 plt.close()
 
-print("[8/8] cnn_loss_curve.png")
+print("[8/8] mlp_loss_curve.png")
 
-history_path = os.path.join(METRICS_DIR, "cnn_history.json")
+history_path = os.path.join(METRICS_DIR, "mlp_loss_curve.json")
 
 if os.path.exists(history_path):
     with open(history_path) as f:
         history = json.load(f)
     train_losses = history["train_loss"]
     val_losses = history["val_loss"]
-    print("  Loaded loss history from cnn_history.json")
+    print("  Loaded loss history from mlp_loss_curve.json")
 else:
-    print("  cnn_history.json not found — training MLP for loss curve...")
+    print("  mlp_loss_curve.json not found — training MLP for loss curve...")
     from sklearn.metrics import log_loss as _log_loss
     from sklearn.neural_network import MLPClassifier
 
@@ -302,12 +302,12 @@ ax.axvline(x=best_epoch, color="green", linestyle=":", alpha=0.6,
 ax.scatter([best_epoch], [best_val], color="green", s=80, zorder=5, edgecolors="black")
 ax.set_xlabel("Epoch")
 ax.set_ylabel("Loss (Cross-Entropy)")
-ax.set_title("Neural Network Training Dynamics — Training vs Validation Loss")
+ax.set_title("MLP Training Dynamics — Training vs Validation Loss")
 ax.legend(fontsize=10)
 ax.grid(True, alpha=0.25)
 ax.set_xlim(1, n_epochs)
 plt.tight_layout()
-plt.savefig(os.path.join(PLOTS_DIR, "cnn_loss_curve.png"))
+plt.savefig(os.path.join(PLOTS_DIR, "mlp_loss_curve.png"))
 plt.close()
 
 
