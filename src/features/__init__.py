@@ -4,5 +4,4 @@ FEATURE_DIMS = {
     "lbp": 26,
     "glcm": 40,
     "fusion": 8358,
-    "cnn": 2048,
 }
