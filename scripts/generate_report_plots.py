@@ -327,7 +327,8 @@ if df_with_pca is not None:
 print("\nCleaning up old plots...")
 unwanted = [
     "confusion_logistic.png", "confusion_random_forest.png", "confusion_svm_rbf.png",
-    "dendrogram_cnn.png", "elbow_cnn.png", "bic_aic_cnn.png",
+    "dendrogram_histogram.png", "elbow_histogram.png", "bic_aic_histogram.png",
+    "cnn_loss_curve.png", "cnn_history.json",
 ]
 for fname in unwanted:
     path = os.path.join(PLOTS_DIR, fname)
