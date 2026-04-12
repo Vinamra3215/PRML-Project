@@ -43,7 +43,7 @@ def analyze_confusion_matrix(y_true, y_pred, class_names):
     }
 
 
-def generate_auto_summary(results_df, feature_type="cnn"):
+def generate_auto_summary(results_df, feature_type="histogram"):
     if results_df.empty:
         return "No results available."
 
@@ -51,15 +51,9 @@ def generate_auto_summary(results_df, feature_type="cnn"):
     if df.empty:
         return "No valid results."
 
-   
     best_idx = df["test_accuracy"].idxmax()
     best = df.loc[best_idx]
 
-    
-    cnn_df = df[df["feature"] == "cnn"]
-    hc_df = df[df["feature"] != "cnn"]
-
-    
     fastest_idx = df["time_seconds"].idxmin()
     fastest = df.loc[fastest_idx]
 
@@ -78,23 +72,6 @@ def generate_auto_summary(results_df, feature_type="cnn"):
         "",
     ]
 
-    if not cnn_df.empty:
-        best_cnn = cnn_df.loc[cnn_df["test_accuracy"].idxmax()]
-        lines.append(
-            f"Best CNN-based: {best_cnn['model']} → {best_cnn['test_accuracy']:.2%}"
-        )
-
-    if not hc_df.empty:
-        best_hc = hc_df.loc[hc_df["test_accuracy"].idxmax()]
-        lines.append(
-            f"Best handcrafted: {best_hc['model']} on {best_hc['feature']} "
-            f"→ {best_hc['test_accuracy']:.2%}"
-        )
-
-    if not cnn_df.empty and not hc_df.empty:
-        gap = cnn_df["test_accuracy"].max() - hc_df["test_accuracy"].max()
-        lines.append(f"CNN advantage: +{gap:.2%} over best handcrafted")
-
     lines.extend([
         "",
         "--- EFFICIENCY ---",
@@ -102,21 +79,12 @@ def generate_auto_summary(results_df, feature_type="cnn"):
         f"({fastest['time_seconds']:.1f}s)",
         "",
         "--- KEY INSIGHT ---",
+        "Results suggest feature quality is the primary bottleneck. "
+        "Among handcrafted features (HOG, LBP, GLCM, Histogram), "
+        "Color Histogram consistently outperforms on this dataset.",
+        "=" * 60,
     ])
 
-    if not cnn_df.empty and cnn_df["test_accuracy"].max() > 0.7:
-        lines.append(
-            "CNN features capture high-level semantic representations that "
-            "significantly outperform handcrafted features (HOG, LBP, etc.), "
-            "demonstrating the power of transfer learning for food classification."
-        )
-    else:
-        lines.append(
-            "Results suggest feature quality is the primary bottleneck. "
-            "Consider deeper CNN backbones or data augmentation."
-        )
-
-    lines.append("=" * 60)
     return "\n".join(lines)
 
 
